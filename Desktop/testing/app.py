@@ -17,9 +17,27 @@ from werkzeug.utils import secure_filename
 import base64
 from datetime import datetime
 import traceback
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, OperationFailure
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.secret_key = "vocaledge_secret_key"
+
+# MongoDB Connection Setup
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    mongo_client = MongoClient(os.getenv('MONGODB_URI'))
+    mongo_db = mongo_client[os.getenv('MONGODB_DBNAME')]
+    voice_analyses = mongo_db.voice_analyses
+    # Create indexes for efficient querying
+    voice_analyses.create_index([("timestamp", -1)])
+    voice_analyses.create_index([("confidence_score", -1)])
+    print("Successfully connected to MongoDB")
+except ConnectionFailure as e:
+    print(f"Could not connect to MongoDB: {e}")
+    raise
 
 # Create necessary directories
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
@@ -294,6 +312,22 @@ def analyze():
     try:
         analysis_results, y, sr = process_audio_file(temp_path)
         session['last_analysis'] = analysis_results
+        
+        # Store analysis in MongoDB
+        analysis_record = {
+            'timestamp': datetime.now(),
+            'filename': filename,
+            'results': analysis_results,
+            'confidence_score': analysis_results.get('confidence_score', 0),
+            'user_id': session.get('user_id', 'anonymous')
+        }
+        
+        try:
+            insert_result = voice_analyses.insert_one(analysis_record)
+            analysis_results['mongo_id'] = str(insert_result.inserted_id)
+        except OperationFailure as e:
+            print(f"Failed to store analysis in MongoDB: {e}")
+        
         return jsonify(analysis_results)
     except Exception as e:
         return jsonify({'error': str(e)})
@@ -313,6 +347,22 @@ def about():
 @app.route('/faq')
 def faq():
     return render_template('faq.html')
+
+@app.route('/api/analyses')
+def get_analyses():
+    try:
+        limit = int(request.args.get('limit', 10))
+        analyses = list(voice_analyses.find()
+                       .sort('timestamp', -1)
+                       .limit(limit))
+        
+        # Convert ObjectId to string for JSON serialization
+        for analysis in analyses:
+            analysis['_id'] = str(analysis['_id'])
+            
+        return jsonify(analyses)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
