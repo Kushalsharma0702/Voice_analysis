@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - VocalEdge AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1><i class="fas fa-microphone-alt"></i> VocalEdge AI</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about" class="active">About</a></li>
+                <li><a href="/faq">FAQ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="about-section">
+            <h2>About VocalEdge AI</h2>
+            
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="{{ url_for('static', filename='about-image.svg') }}" alt="Voice analysis illustration">
+                </div>
+                
+                <div class="about-text">
+                    <h3>Our Mission</h3>
+                    <p>VocalEdge AI was developed to help people improve their vocal communication skills through advanced audio analysis and personalized feedback. Whether you're preparing for an interview, practicing public speaking, or working on your singing voice, our tool provides objective metrics and actionable suggestions.</p>
+                    
+                    <h3>How It Works</h3>
+                    <p>VocalEdge AI analyzes several key aspects of your voice:</p>
+                    <ul>
+                        <li><strong>Pitch Analysis:</strong> Measures the average pitch and variation to assess expressiveness</li>
+                        <li><strong>Energy Level:</strong> Evaluates the volume and projection of your voice</li>
+                        <li><strong>Pause Detection:</strong> Identifies unnatural pauses or hesitations</li>
+                        <li><strong>Filler Word Estimation:</strong> Estimates the use of filler words like "um" and "uh"</li>
+                        <li><strong>Context Recognition:</strong> Provides specialized feedback based on your specific use case (interviews, public speaking, etc.)</li>
+                    </ul>
+                    
+                    <h3>Technology</h3>
+                    <p>Our system uses advanced audio processing libraries including librosa for spectral analysis, speech recognition for transcription, and machine learning algorithms to evaluate vocal confidence and clarity. All processing is done securely on our servers with your privacy in mind.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 VocalEdge AI | Voice Analysis Tool</p>
+    </footer>
+</body>
+</html>

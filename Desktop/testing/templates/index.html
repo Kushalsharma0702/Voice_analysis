@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VocalEdge AI - Voice Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Enhance Your Voice Skills</h2>
+                <p>Analyze your voice, get actionable feedback, and improve your confidence.</p>
+            </div>
+        </section>
+
+        <section class="recorder-container">
+            <div class="recording-options">
+                <div class="option">
+                    <button id="recordBtn" class="btn primary-btn">
+                        <i class="fas fa-microphone"></i> Start Recording
+                    </button>
+                    <p>Record your voice directly (20 seconds)</p>
+                </div>
+                <div class="option">
+                    <label for="audioFileInput" class="btn secondary-btn">
+                        <i class="fas fa-upload"></i> Upload Audio
+                    </label>
+                    <input type="file" id="audioFileInput" accept="audio/*" style="display: none;">
+                    <p>Upload an existing audio file (.mp3, .wav)</p>
+                </div>
+            </div>
+            
+            <div id="recordingStatus" class="hidden">
+                <div class="recording-animation">
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                </div>
+                <p id="recordingTime">Recording: 0s</p>
+            </div>
+            
+            <audio id="audioPlayback" controls class="hidden"></audio>
+            
+            <div id="processingStatus" class="hidden">
+                <div class="spinner"></div>
+                <p>Processing your voice...</p>
+            </div>
+        </section>
+
+        <section id="results" class="hidden">
+            <div class="results-header">
+                <h2>🧠 Voice Health Report</h2>
+                <button id="downloadPdfBtn" class="btn">
+                    <i class="fas fa-file-pdf"></i> Save as PDF
+                </button>
+            </div>
+            
+            <div id="reportContent">
+                <div class="results-summary">
+                    <div class="score-circle">
+                        <div id="confidenceScore">0%</div>
+                        <div id="confidenceLabel">N/A</div>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="metric-name">Pitch Mean:</span>
+                            <span id="pitchMean">0 Hz</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Pitch Variation:</span>
+                            <span id="pitchStd">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Energy Level:</span>
+                            <span id="energyMean">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Pauses:</span>
+                            <span id="pauseCount">0</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Filler Words:</span>
+                            <span id="fillerCount">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="warnings" class="warning-box hidden">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Warnings</h3>
+                    <ul id="warningsList"></ul>
+                </div>
+
+                <div class="suggestions">
+                    <h3>Suggestions to Improve</h3>
+                    <ul id="suggestionsList"></ul>
+                </div>
+                
+                <div id="transcriptContainer" class="hidden">
+                    <h3>Transcript</h3>
+                    <p id="transcript"></p>
+                </div>
+                
+                <div class="spectrogram">
+                    <h3>Voice Visualization</h3>
+                    <img id="spectrogramImage" src="" alt="Voice Spectrogram">
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 VocalEdge AI | Voice Analysis Tool</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

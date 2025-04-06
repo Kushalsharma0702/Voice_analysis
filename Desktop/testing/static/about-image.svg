@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6a11cb;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#2575fc;stop-opacity:0.1"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background rectangle -->
+  <rect width="400" height="300" fill="url(#bgGradient)" rx="10" ry="10"/>
+  
+  <!-- Microphone base -->
+  <rect x="180" y="220" width="40" height="20" rx="5" ry="5" fill="#333"/>
+  
+  <!-- Microphone stand -->
+  <rect x="195" y="150" width="10" height="70" fill="#555"/>
+  
+  <!-- Microphone -->
+  <ellipse cx="200" cy="125" rx="25" ry="35" fill="#6a11cb"/>
+  <ellipse cx="200" cy="125" rx="15" ry="25" fill="#2575fc"/>
+  
+  <!-- Sound waves -->
+  <path d="M 240,115 Q 260,125 240,135" stroke="#6a11cb" stroke-width="3" fill="none"/>
+  <path d="M 250,105 Q 280,125 250,145" stroke="#6a11cb" stroke-width="3" fill="none"/>
+  <path d="M 260,95 Q 300,125 260,155" stroke="#6a11cb" stroke-width="3" fill="none"/>
+  
+  <path d="M 160,115 Q 140,125 160,135" stroke="#2575fc" stroke-width="3" fill="none"/>
+  <path d="M 150,105 Q 120,125 150,145" stroke="#2575fc" stroke-width="3" fill="none"/>
+  <path d="M 140,95 Q 100,125 140,155" stroke="#2575fc" stroke-width="3" fill="none"/>
+  
+  <!-- Musical note -->
+  <path d="M 300,70 L 300,120 C 300,130 290,140 280,135 C 270,130 270,115 280,110 C 285,108 290,110 290,110 L 290,70 Z" fill="#333"/>
+  <ellipse cx="280" cy="122" rx="10" ry="7" fill="#333"/>
+  
+  <!-- Waveform -->
+  <polyline points="50,170 60,160 70,180 80,155 90,185 100,150 110,190 120,145 130,195 140,140 150,180" 
+            stroke="#6a11cb" stroke-width="2" fill="none"/>
+  <polyline points="50,220 60,210 70,230 80,205 90,235 100,200 110,240 120,195 130,245 140,190 150,230" 
+            stroke="#2575fc" stroke-width="2" fill="none"/>
+  
+  <!-- Text visualization -->
+  <rect x="320" y="200" width="60" height="8" rx="4" ry="4" fill="#6a11cb" opacity="0.7"/>
+  <rect x="320" y="220" width="40" height="8" rx="4" ry="4" fill="#2575fc" opacity="0.7"/>
+  <rect x="320" y="240" width="50" height="8" rx="4" ry="4" fill="#6a11cb" opacity="0.7"/>
+</svg>
