@@ -14,30 +14,11 @@ matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request, jsonify, send_file, session
 from werkzeug.utils import secure_filename
-import base64
 from datetime import datetime
 import traceback
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure, OperationFailure
-from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.secret_key = "vocaledge_secret_key"
-
-# MongoDB Connection Setup
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-    mongo_client = MongoClient(os.getenv('MONGODB_URI'))
-    mongo_db = mongo_client[os.getenv('MONGODB_DBNAME')]
-    voice_analyses = mongo_db.voice_analyses
-    # Create indexes for efficient querying
-    voice_analyses.create_index([("timestamp", -1)])
-    voice_analyses.create_index([("confidence_score", -1)])
-    print("Successfully connected to MongoDB")
-except ConnectionFailure as e:
-    print(f"Could not connect to MongoDB: {e}")
-    raise
 
 # Create necessary directories
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
@@ -51,11 +32,9 @@ os.makedirs(STATIC_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['REPORTS_FOLDER'] = REPORTS_FOLDER
 
-# Audio stream config
 RATE = 22050
 RECORD_SECONDS = 20
 
-# NLP Use-Case Detection
 USE_CASE_KEYWORDS = {
     "interview": ["interview", "introduction", "self intro", "tell me about yourself"],
     "singing": ["song", "singing", "practice singing"],
@@ -224,14 +203,14 @@ def analyze_voice(y, rate):
 def generate_spectrogram(y, sr, filename="spectrogram.png"):
     plt.figure(figsize=(12, 6))
 
-    # Waveform (top)
+    # Waveform
     plt.subplot(2, 1, 1)
     librosa.display.waveshow(y, sr=sr, alpha=0.7, color='mediumpurple')
     plt.title("Waveform")
     plt.ylabel("Amplitude")
     plt.xlabel("")
 
-    # Spectrogram (bottom)
+    # Spectrogram
     plt.subplot(2, 1, 2)
     S = librosa.stft(y)
     S_db = librosa.amplitude_to_db(np.abs(S), ref=np.max)
@@ -242,8 +221,6 @@ def generate_spectrogram(y, sr, filename="spectrogram.png"):
     plt.xlabel("Time (s)")
 
     plt.tight_layout()
-    
-    # Save to static folder
     filepath = os.path.join(STATIC_FOLDER, filename)
     plt.savefig(filepath)
     plt.close()
@@ -251,33 +228,22 @@ def generate_spectrogram(y, sr, filename="spectrogram.png"):
 
 def process_audio_file(file_path):
     try:
-        # Try to load the audio file with librosa, which supports various formats
         y, sr = librosa.load(file_path, sr=RATE)
-        
-        # Convert to mono if stereo
         if len(y.shape) > 1:
             y = librosa.to_mono(y)
-        
-        # Normalize audio
         y = librosa.util.normalize(y)
-        
-        # Save as WAV for speech recognition
         temp_wav_path = "temp.wav"
         sf.write(temp_wav_path, y, sr)
-        
-        # Analyze the voice
+
         analysis_results = analyze_voice(y, sr)
-        
-        # Generate spectrogram
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         spec_filename = f"spectrogram_{timestamp}.png"
-        spectrogram_path = generate_spectrogram(y, sr, spec_filename)
+        generate_spectrogram(y, sr, spec_filename)
         analysis_results["spectrogram"] = spec_filename
-        
-        # Clean up temporary file
+
         if os.path.exists(temp_wav_path):
             os.remove(temp_wav_path)
-            
         return analysis_results, y, sr
     except Exception as e:
         print(f"Error processing audio file: {str(e)}")
@@ -298,41 +264,21 @@ def index():
 def analyze():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'})
-    
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'})
     
-    # Save uploaded file temporarily
     filename = secure_filename(file.filename)
     temp_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(temp_path)
-    
-    # Process the audio file
+
     try:
         analysis_results, y, sr = process_audio_file(temp_path)
         session['last_analysis'] = analysis_results
-        
-        # Store analysis in MongoDB
-        analysis_record = {
-            'timestamp': datetime.now(),
-            'filename': filename,
-            'results': analysis_results,
-            'confidence_score': analysis_results.get('confidence_score', 0),
-            'user_id': session.get('user_id', 'anonymous')
-        }
-        
-        try:
-            insert_result = voice_analyses.insert_one(analysis_record)
-            analysis_results['mongo_id'] = str(insert_result.inserted_id)
-        except OperationFailure as e:
-            print(f"Failed to store analysis in MongoDB: {e}")
-        
         return jsonify(analysis_results)
     except Exception as e:
         return jsonify({'error': str(e)})
     finally:
-        # Clean up the temporary file
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
@@ -347,22 +293,6 @@ def about():
 @app.route('/faq')
 def faq():
     return render_template('faq.html')
-
-@app.route('/api/analyses')
-def get_analyses():
-    try:
-        limit = int(request.args.get('limit', 10))
-        analyses = list(voice_analyses.find()
-                       .sort('timestamp', -1)
-                       .limit(limit))
-        
-        # Convert ObjectId to string for JSON serialization
-        for analysis in analyses:
-            analysis['_id'] = str(analysis['_id'])
-            
-        return jsonify(analyses)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
